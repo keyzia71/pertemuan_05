@@ -1,154 +1,75 @@
 <?php
 
-$nama = isset($_POST['nama']) ? trim($_POST['nama']) : '';
-
-$email = isset($_POST['email']) ? trim($_POST['email']) : '';
-
-$jumlah = filter_input(INPUT_POST, 'jumlah', FILTER_VALIDATE_INT);
-
-$errors = array();
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-    // Validasi nama
-    if ($nama === '') {
-        $errors['nama'] = 'Nama wajib diisi.';
-    } elseif (strlen($nama) < 3) {
-        $errors['nama'] = 'Nama minimal 3 karakter.';
-    }
-
-    // Validasi email
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors['email'] = 'Format email tidak valid.';
-    }
-
-    // Validasi jumlah peserta
-    if (
-        $jumlah === false ||
-        $jumlah === null ||
-        $jumlah < 1 ||
-        $jumlah > 5
-    ) {
-        $errors['jumlah'] = 'Jumlah peserta harus 1 sampai 5.';
-    }
-
-    // Jika tidak ada error
-    if (empty($errors)) {
-
-        header(
-            'Location: sukses.php?nama=' . urlencode($nama)
-        );
-
-        exit;
-    }
-}
-
-// Fungsi untuk mengamankan output
-function e($value)
+function e(string $value): string
 {
-    return htmlspecialchars(
-        $value,
-        ENT_QUOTES,
-        'UTF-8'
-    );
+    return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 }
 
-?>
+function validasiNama(string $nama): string
+{
+    if ($nama === '') {
+        return 'Nama wajib diisi.';
+    }
 
-<!DOCTYPE html>
-<html lang="id">
+    if (mb_strlen($nama) < 3) {
+        return 'Nama minimal 3 karakter.';
+    }
 
-<head>
+    return '';
+}
 
-    <meta charset="UTF-8">
+function validasiNim(string $nim): string
+{
+    if ($nim === '') {
+        return 'NIM wajib diisi.';
+    }
 
-    <title>Form Pendaftaran</title>
+    if (!preg_match('/^\d{8,15}$/', $nim)) {
+        return 'NIM harus 8-15 digit.';
+    }
 
-</head>
+    return '';
+}
 
-<body>
+function validasiEmail(string $email): string
+{
+    if ($email === '') {
+        return 'Email wajib diisi.';
+    }
 
-<h1>Form Pendaftaran</h1>
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        return 'Format email tidak valid.';
+    }
 
-<form method="post" action="form.php">
+    return '';
+}
 
-    <!-- Nama -->
-    <label>
-        Nama:
-        <input
-            type="text"
-            name="nama"
-            value="<?php echo e($nama); ?>"
-        >
-    </label>
+function validasiPilihan(string $nilai, array $daftar, string $pesan): string
+{
+    if ($nilai === '') {
+        return $pesan;
+    }
 
-    <small>
-        <?php
-        echo isset($errors['nama'])
-            ? e($errors['nama'])
-            : '';
-        ?>
-    </small>
+    if (!in_array($nilai, $daftar, true)) {
+        return 'Pilihan tidak valid.';
+    }
 
-    <br><br>
+    return '';
+}
 
+function validasiJumlah($jumlah): string
+{
+    if ($jumlah === null || $jumlah === '') {
+        return 'Jumlah peserta wajib diisi.';
+    }
 
-    <!-- Email -->
-    <label>
-        Email:
-        <input
-            type="email"
-            name="email"
-            value="<?php echo e($email); ?>"
-        >
-    </label>
+    if (!filter_var($jumlah, FILTER_VALIDATE_INT)) {
+        return 'Jumlah peserta harus berupa angka.';
+    }
 
-    <small>
-        <?php
-        echo isset($errors['email'])
-            ? e($errors['email'])
-            : '';
-        ?>
-    </small>
+    if ($jumlah < 1 || $jumlah > 3) {
+        return 'Jumlah peserta harus 1 sampai 3.';
+    }
 
-    <br><br>
-
-
-    <!-- Jumlah peserta -->
-    <label>
-        Jumlah peserta:
-        <input
-            type="number"
-            name="jumlah"
-            min="1"
-            max="5"
-            value="<?php
-                echo e(
-                    isset($_POST['jumlah'])
-                    ? $_POST['jumlah']
-                    : '1'
-                );
-            ?>"
-        >
-    </label>
-
-    <small>
-        <?php
-        echo isset($errors['jumlah'])
-            ? e($errors['jumlah'])
-            : '';
-        ?>
-    </small>
-
-    <br><br>
-
-
-    <button type="submit">
-        Daftar
-    </button>
-
-</form>
-
-</body>
-
-</html>
+    return '';
+}
