@@ -28,7 +28,7 @@ function e($value)
 <h1>Pendaftaran Berhasil</h1>
 
 <p>
-    Terima kasih,
+    Terima kasih,keyzia
     <?php echo e($nama); ?>.
 </p>
 
